@@ -1,0 +1,36 @@
+# Rust build artifacts
+target/
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Environment files
+.env*
+
+# SSL certificates
+*.pem
+*.crt
+*.key
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/

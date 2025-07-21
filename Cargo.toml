@@ -1,0 +1,27 @@
+[package]
+name = "rustzban-node"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+atty = "0.2.14"
+axum = { version = "0.8.4", features = ["ws", "multipart"] }
+config = "0.15.13"
+dotenv = "0.15.0"
+futures = "0.3.31"
+openssl = { version = "0.10.73", features = ["vendored"] }
+regex = "1.11.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.141"
+thiserror = "2.0.12"
+tokio = { version = "1.46.1", features = ["full"] }
+tokio-tungstenite = "0.27.0"
+tower = { version = "0.5.2", features = ["full"] }
+tower-http = { version = "0.6.6", features = ["trace"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "chrono"] }
+uuid = { version = "1.17.0", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tempfile = "3.20.0"
