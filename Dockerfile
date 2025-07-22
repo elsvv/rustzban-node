@@ -1,31 +1,18 @@
-ARG PYTHON_VERSION=3.12
+FROM rust:1.86-slim AS builder
 
-FROM python:$PYTHON_VERSION-slim AS build
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
-ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY . .
+ENV OPENSSL_NO_VENDOR=1
+RUN cargo build --release
 
-WORKDIR /code
+FROM debian:bookworm-slim
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential curl unzip gcc python3-dev libpq-dev \
-    && curl -L https://github.com/Gozargah/Marzban-scripts/raw/master/install_latest_xray.sh | bash \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates curl unzip && \
+    curl -L https://github.com/Gozargah/Marzban-scripts/raw/master/install_latest_xray.sh | bash && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements.txt /code/
-RUN python3 -m pip install --upgrade pip setuptools \
-    && pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-FROM python:$PYTHON_VERSION-slim
-
-ENV PYTHON_LIB_PATH=/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages
-WORKDIR /code
-
-RUN rm -rf $PYTHON_LIB_PATH/*
-
-COPY --from=build $PYTHON_LIB_PATH $PYTHON_LIB_PATH
-COPY --from=build /usr/local/bin /usr/local/bin
-COPY --from=build /usr/local/share/xray /usr/local/share/xray
-
-COPY . /code
-
-CMD ["bash", "-c", "python main.py"]
+COPY --from=builder /app/target/release/rustzban-node /usr/local/bin/
+EXPOSE 62050 62051
+CMD ["rustzban-node"] 

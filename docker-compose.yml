@@ -2,13 +2,13 @@ services:
     rustzban-node:
         build:
             context: .
-            dockerfile: Dockerfile.rust
+            dockerfile: Dockerfile
         restart: always
         network_mode: host
         environment:
-            SSL_CERT_FILE: '/var/lib/rustzban-node/ssl_cert.pem'
-            SSL_KEY_FILE: '/var/lib/rustzban-node/ssl_key.pem'
-            # SSL_CLIENT_CERT_FILE: "/var/lib/rustzban-node/ssl_client_cert.pem"
+            # SSL_CERT_FILE: '/var/lib/rustzban-node/ssl_cert.pem'
+            # SSL_KEY_FILE: '/var/lib/rustzban-node/ssl_key.pem'
+            SSL_CLIENT_CERT_FILE: '/var/lib/rustzban-node/ssl_client_cert.pem'
             SERVICE_PROTOCOL: 'rest'
         volumes:
             - /var/lib/rustzban-node:/var/lib/rustzban-node
