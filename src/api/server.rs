@@ -2,8 +2,9 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use axum_server::tls_rustls::RustlsConfig;
 use std::sync::Arc;
-use tokio::net::TcpListener;
+use std::net::SocketAddr;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
@@ -17,6 +18,7 @@ use crate::{
     },
     config::Config,
     session::SessionManager,
+    ssl::auth::SslConfig,
 };
 
 /// Создает REST сервер (аналог FastAPI app в Python)
@@ -55,14 +57,30 @@ pub async fn create_rest_server(config: Arc<Config>) -> Result<(), Box<dyn std::
                 .into_inner(),
         );
     
-    // Создаем listener
     let addr = format!("{}:{}", config.service_host, config.service_port);
-    let listener = TcpListener::bind(&addr).await?;
+    let socket_addr: SocketAddr = addr.parse()
+        .map_err(|e| format!("Failed to parse address {}: {}", addr, e))?;
     
-    tracing::info!("REST server listening on {}", addr);
+    // Для REST протокола всегда используем HTTPS (как в Python версии)
+    tracing::info!("Starting HTTPS server on {}", socket_addr);
     
-    // Запускаем сервер (пока без SSL - добавим позже)
-    axum::serve(listener, app).await?;
+    // Создаем SSL конфигурацию
+    let ssl_config = SslConfig::new(
+        config.ssl_cert_file.clone(),
+        config.ssl_key_file.clone(),
+        config.ssl_client_cert_file.clone(),
+    );
+    
+            // Создаем TLS конфигурацию для axum-server
+        let tls_config = RustlsConfig::from_pem_file(
+            &ssl_config.cert_file,
+            &ssl_config.key_file,
+        ).await?;
+    
+    // Запускаем HTTPS сервер
+    axum_server::bind_rustls(socket_addr, tls_config)
+        .serve(app.into_make_service())
+        .await?;
     
     Ok(())
 }

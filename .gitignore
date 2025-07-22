@@ -162,5 +162,7 @@ cython_debug/
 *-dev.*
 
 # ssl
+ssl_certs/
 ssl_cert.pem
 ssl_key.pem
+

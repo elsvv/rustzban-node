@@ -123,6 +123,8 @@ pub fn create_ssl_acceptor(config: &SslConfig) -> Result<SslAcceptor, SslAuthErr
     Ok(acceptor.build())
 }
 
+
+
 /// Middleware для проверки клиентского сертификата
 /// Аналог проверок в Python версии main.py
 pub async fn client_cert_middleware(

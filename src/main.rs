@@ -14,10 +14,13 @@ use tracing::{info, warn, error};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Загружаем конфигурацию
-    let config = Config::load().map_err(|e| {
-        eprintln!("Failed to load configuration: {}", e);
-        std::process::exit(1);
-    })?;
+    let config = match Config::load() {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("Failed to load configuration: {}", e);
+            std::process::exit(1);
+        }
+    };
     
     // Валидируем конфигурацию
     if let Err(e) = config.validate() {
@@ -66,9 +69,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Check service protocol
     match config.service_protocol.as_str() {
         "rest" => {
-            // For REST protocol check that client certificate is specified
+            // For REST protocol check that client certificate is specified (like in Python version)
             if config.ssl_client_cert_file.is_none() {
-                warn!("SSL_CLIENT_CERT_FILE is not set. This is not secure for production use!");
+                error!("SSL_CLIENT_CERT_FILE is required for rest service.");
+                std::process::exit(1);
             }
             
             info!("Starting REST server on {}:{}", config.service_host, config.service_port);
